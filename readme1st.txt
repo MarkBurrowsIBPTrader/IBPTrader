@@ -3,7 +3,7 @@ IB_PTrader for Interactive Brokers
 
 IB_PTrader is an automated trading application designed to work on the Interactive Brokers TWS platform.
 IB_PTrader uses the concept of a "pyramid generator" of buy/sell orders as described on the
-https://www.gracelandupdates.com website. This approach removes the need to try and determine the direction
+http://www.gracelandupdates.com website. This approach removes the need to try and determine the direction
 of the price of a share (via technical analysis for example), but only to react to the price change.
 As the price of a share falls the app buys more, as it rises the app sells the shares it bought at a lower price.
 
