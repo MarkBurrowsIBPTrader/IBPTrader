@@ -1,0 +1,235 @@
+IB_PTrader GUI
+--------------
+
+All the jpg files mentioned in this document are located in the ScreenShots directory.
+
+When the app is launched its appearance is as shown in 1st_startup.jpg
+
+The top pane displays all the tickers/quotes. The pane beneath displays status messages.
+
+Before trading can commence the share data must be loaded. The file settingup_runtime_environment.txt
+describes how to create XML buy/sell order data for importing.
+
+On the bottom row to the left there are 3 buttons:-
+
+"DB"
+----
+
+Read buy/sell orders from the database
+
+
+"DB/XML"
+--------
+
+Read and merge buy/sell orders from the database/XML
+
+
+"XML"
+-----
+
+Read orders from XML
+
+One of these 3 buttons must be pressed to load the data. If you're adding new share 
+data via XML then press "DB/XML" or "XML". Note the "XML" option deletes the current 
+database data first (the contents of the deals table). If you're just loading 
+existing data from the database then press "DB".
+
+After the data has loaded the appearance will be as shown as in 2nd_dataloaded.jpg
+The shares shown in this example were created using the eg.bat file in the DB directory.
+See the "PShare/PGen Examples" section in the settingup_runtime_environment.txt file for details.
+
+When choosing the "DB/XML", "XML" options a large amount of data can be created on the heap which
+is then deleted. It is recommended to restart the app after this and then use the "DB" option.
+This reduces the amount of heap fragmentation that might happen when deleting very large data sets. 
+
+
+"Go!"
+----- 
+
+Initially the app is in a stopped state (ie no trading is allowed. In this mode the app will still 
+process any orders that have just been executed by TWS). The window title shows "(STOPPED)" on 
+the end. Pressing "Go!" enables trading and the text of the button changes to "Stop".
+
+
+Ticker Display
+--------------
+
+Below is example of a ticker displayed in the quotes pane:-
+
+aP_20:00<*#LNKD=176.42 (3), 176.84 (8) 10K, AvS=176.12>, 176.00 (B), **181.00 (B_5_7.25), 186.00 (a) --> (LOW 183.25), OI=10 - <176.42 to 176.75, 176.84 to 177.32> - B=$0.00 (2000.00)
+^        ^      ^           ^          ^        ^                    ^                            ^                ^                                                  ^               
+|        |      bid         offer      vol      average share        the nearest           available to be         nearest sell                                       buy limit of $2000
+|        |                                      price according      buy order to          bought. B means         order for bid                                      for the day. 0$
+|        |                                      to IB                the offer             already bought,                                                            bought so far.
+|        |                                                                                 P - pending, awaiting 
+|        |                                                                                 order execution
+|        * means only buy if share offer price is below IB's average
+|        # means allow early buys
+|
+|
+means auto liquidate is set for this share. Liquidate all LNKD shares in
+profit at 20:00pm (UK time) - 15:00 US Market time.
+
+
+The buttons from top/left are as follows:-
+
+"D Quotes"
+----------
+
+Dumps the contents of the quotes pane to a file. The name of the file is displayed in the status message pane
+
+
+"D Mess"
+--------
+
+Dumps the contents of the messages pane to a file
+
+
+"Internal Data"
+---------------
+
+Dumps app internal data to a file - for debugging purposes only.
+
+
+"Kill All", "Kill Buy", "Kill Sell"
+-----------------------------------
+
+These buttons cancel orders. The order id is entered in the edit field to the
+right. Note this doesn't kill orders in TWS. This feature is used when TWS executes an order
+but doesn't send a confirmation message to IB_PTrader. This can happen if IB_PTrader is
+offline or if TWS has data feed issues. The order id for an outstanding order is shown
+when the "Orders" button is pressed.
+
+
+"Stats"
+-------
+
+Displays stats
+
+
+"Stats File"
+------------
+
+Dumps stats to a file
+
+
+"Orders"
+--------
+
+Displays the currently active orders
+
+
+"?", "Goto Active", "Goto InActive", "Goto Buy", "Goto Sell"
+------------------------------------------------------------
+
+The next 5 buttons concern the status of an individual ticker. A share (ticker) has 5 possible states:-
+
+Active - can both buy and sell shares
+InActive - no selling or buying of shares
+SellOnly - only sell shares
+BuyOnly - only buy shares
+DISABLED - same as inactive but no price feed is requested and user cannot change the state in the GUI
+
+These 5 buttons allow the user to change the state of currently selected ticker in the ticker pane. This
+is shown in 3rd_statusbuttons.jpg
+
+
+"Quit"
+------
+
+Quits the app. Note you will be asked to confirm if there are any outstanding buy/sell orders.
+
+
+"Data"
+------
+
+This displays a dialog which shows account/portfolio data sent to the app from TWS.
+
+
+"Scroll"
+--------
+
+Scrolls the messages pane to the end.
+
+
+"Clear"
+-------
+
+Clears the messages pane
+
+
+"U Quotes"
+----------
+
+Unselects the currently selected ticker in the ticker pane
+
+
+"U Mess"
+--------
+
+Unselects the currently selected line in the messages pane
+
+
+"T Liquid", "Liquidate"
+-----------------------
+
+These buttons have 2 modes, a display mode and an action mode.
+
+If the edit field is empty then display mode is used. "T Liquid" - only displays trades done today.
+"Liquidate" displays all trades.
+
+In display mode a list of all currently bought shares is shown, split into profit/loss categories.
+
+In action mode if the edit field contains a "P" or a "p" then all shares (for the currently selected ticker)
+that are in profit will liquidated. In action mode you always be asked to confirm the action.
+"LL" or "ll" - liquidate shares currently at a loss
+"AA" or "aa" - liquidate all shares
+
+These liquidate options complement the automatic liquidate feature (see howtoconfig_app_in_source_code.txt for details)
+
+
+The next button toggles if the app is allowed to buy shares that are below IB's cost average for the share
+----------------------------------------------------------------------------------------------------------
+
+
+"Batch Buy"
+-----------
+
+When this is enabled the app makes a batch buy for a ticker. Batch buys are only available
+when there is a daily buy limit specified for the ticker (see howtoconfig_app_in_source_code.txt for details)
+
+Consider the following buy points:-
+
+$20 (sell at $22), $25 (sell at $27), $30 (sell at $32), $35 (sell at $37)
+
+normally the lowest buy price for the 25 buy point would be $20.01, $25.01 for 30, $30.01 for 35
+If batch buy is enabled and the buy day limit is sufficient an offer of 20.01 would mean
+the 25, 30, 35 buy points would be filled. When the bid hit $37 then the maximum possible profit
+on the 35 buy point would be (37 - 20.01 = 16.99) instead of (37 - 30.01 = 6.99).
+
+
+"Batch Check"
+-------------
+
+This displays a message box showing all the buy points that would be filled if batch buy was enabled. If
+a value is entered in the edit field the code uses this value else it uses the max buy limit for the share
+for the day.
+
+
+Context Menus
+-------------
+
+Right clicking on a ticker displays a context menu as seen in 4th_contextmenu.jpg
+In the screenshot note the 2500 entered in the edit field and how it affects the options in the menu.
+
+If "live prices" are set for a ticker (see howtoconfig_app_in_source_code.txt for details), it is possible to view a live
+chart for today's prices. See 5th_contextmenu.jpg and 6th_livechart.jpg.
+
+In the context menu you can change buy/sell limits for a share and can change the automatic liquidations for the
+share. For the liquidations the value in the edit box is the liquidate time eg 2053 would mean liquidate at 20:53.
+
+
+Double Click
+------------
+
+Double clicking on a ticker displays a message box as shown in 7th_doubleclick.jpg

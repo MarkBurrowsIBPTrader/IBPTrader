@@ -1,0 +1,161 @@
+This is a summary of all the source code files in the project. Please note all the build warnings come from
+3rd party software.
+
+All the SQL code for the project is inline in the source code. Stored procedures haven't been used because:-
+1) ease of development
+2) there is no need to hide business logic from a client layer/or prevent security issues like SQL injection
+3) SPs aren't necessarily any faster/more efficient than inline SQL statements (DBs cache sql statements). 
+
+AppSettings.h -
+abstract class/concrete class definitions for app live/paper settings
+
+BSearch.h, BSearch.cpp - 
+performs binary search for the nearest BuyPricePair/SellPricePair objects on receiving a price
+
+Buy.cpp - 
+issues buy orders
+
+BuySell.cpp - 
+helper code that calculates trading commissions, checks whether a market is open for trading
+
+ChartViewDlg.cpp - 
+dialog that shows the price chart for a share
+
+ChartViewer.cpp, ChartViewer.h - 
+3rd party code and is copyright Advanced Software Engineering Limited. This code is part of the charting software
+
+CreateDataViewDlg.cpp - 
+responsible for creating a price chart
+
+DatabaseSupport.cpp - 
+this code connects to the MySQL database
+
+DataPointsForGraph.cpp - 
+stores price data for a chart
+
+DataTypes.cpp, DataTypes.h - 
+the class PGenDatabaseRows contains a collection of all PGenDatabaseRow objects for all tickers. Each PGenDatabaseRow 
+object represents a row in the deals table. The class BuyPricePair represents a potential buy order. It stores
+a buy price (and number of shares to buy) for a particular ticker. It holds a pointer to a SellPricePair object which
+represents a sell price for the buy price. Both prices have 4 potential states:-
+ACTIVE - available to buy/sell 
+PENDING - order has been placed, IB TWS has not yet confirmed order has been executed
+BOUGHT - buy order has been executed and buy price is not available (until the sell order has been executed)
+CANCELLED - order has been cancelled
+
+EClientSocket.cpp, EClientSocketBase.cpp - 
+this is 3rd party code and is Copyright (C) 2013 Interactive Brokers LLC. The project directly references these source files  
+from the c:\tws api directory. The project is built on the C drive meaning if the IB API code and the 
+project are located on different drives these files will have to re-added to the project manually.
+
+HandleOrderStatus.cpp - 
+this processes the results of an order execution from TWS ie filled orders, cancelled orders. It records completed trades
+in the trades table.
+
+Helpers.cpp - 
+general code for accounts, portfolio
+
+IB_DataDumpDlg.cpp - 
+dialog for all account/portfolio information
+
+ib_ewrapper_sub.cpp - 
+contains the methods the IB API calls to pass price feed data to the app
+
+ib_liquidation.cpp - 
+this code sells any shares that are in profit. This is either done on a timer, or caused by the user via the GUI
+
+ib_ptrader.cpp - 
+the main class for the app.
+
+ib_ptraderdlg.cpp, ib_ptraderdlg.h - 
+dialog code for the main window. IB_PTraderDlg inherits from EWrapper (an IB API class). IB_PTraderDlg receives
+data from IB via overridden virtual functions.
+
+ib_ptraderdlg_BatchCheck.cpp - 
+this handles batch buys. When batch buys are enabled multiple buy prices are bought in 1 go
+
+ib_ptraderdlg_ContextMenu.cpp - 
+creates the context menu when a user right clicks on a ticker
+
+ib_ptraderdlg_Diag.cpp - 
+code that dumps internal data of the app
+
+ib_ptraderdlg_DoubleClickQuotes.cpp - 
+this displays the message box when a user double clicks on a ticker
+
+ib_ptraderdlg2.cpp - 
+contains message handlers for the IB_PTraderDlg class
+
+LivePriceLogger.cpp, LivePriceLogger.h - 
+this class records all the price changes for a ticker
+
+Log.cpp - 
+handles the logging of messages for display on the GUI
+
+MarketStatus.cpp, MarketStatus.h - 
+the MarketDetails class stores the opening hours of different stock markets
+
+OnTimer.cpp - 
+handles internal timer callbacks. Used to check for automatic price liquidations
+
+OutstandingOrder.cpp, OutstandingOrder.h - 
+these classes store orders that are active and that have not been executed yet.
+This data is stored both in memory and in the orders table
+
+RecordPrices.cpp - 
+this code records price changes to either the DB or a log file.
+
+Sell.cpp - 
+issues sell orders
+
+Settings_GlobalCurrencies.cpp - 
+helper functions
+
+Settings_Live.cpp - 
+methods that control app behaviour for live accounts
+
+Settings_Paper.cpp - 
+methods that control app behaviour for paper accounts
+
+Share.cpp, Share.h - 
+a Share class represents a row in the shares table. Each share is given a tickerid (this is used when requesting a price feed from IB).
+The Share class also stores the maximum number of shares that can be held, as well as the maximum value of the shares in the currency of the share.
+
+sqlstring.h - 
+3rd party code and is Copyright 2009 - 2010 Sun Microsystems, Inc.
+
+StartUp.cpp - 
+this code loads shares from the DB, and requests a price feed from IB for each share.
+
+Stats.cpp, Stats.h - 
+the app record statistics while operating, and this class stores them. Stats are stored on a global/per ticker basis and can be displayed in the GUI
+
+TechnicalAnalysis.cpp, TechnicalAnalysis.h - 
+contains code that calculates some well-known technical indicators. The app can use this when determining whether to buy a share
+
+TechnicalAnalysis_Support.cpp - 
+helpers
+
+Ticker.cpp, Ticker.h - 
+Ticker class stores the latest bid/offer prices for a share. There is a 1 to 1 mapping for a Ticker object to a Share object
+
+TickerListBox.cpp, TickerListBox.h - 
+the code for the owner draw listbox which displays all the tickers
+
+Tickers.cpp - 
+Tickers store all the tickers in a collection
+
+TickersInitialisation.cpp - 
+reads prices from DB/XML, also writes prices to the DB
+
+TickersListBoxInit.cpp - 
+sorts display order of tickers in the GUI
+
+Trades.cpp - 
+records completed buy/sell orders in the trades table
+
+Trends.cpp - 
+determines if a trending share should be sold yet
+
+WrapperSupport.cpp - 
+helper functions

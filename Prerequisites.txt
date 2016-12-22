@@ -1,0 +1,15 @@
+This project is aimed at experienced investors who wish to automate their trading. The project also requires
+them to be experienced developers in order to build and run the project.
+
+The prerequisites are:-
+
+Interactive Brokers Account
+Installation of IB TWS, IB API
+MySQL
+Boost
+Chart Director
+Xerces XML Parser
+Visual Studio 2008 SP1 (or the v90 toolset if building with a later version of Visual Studio). Note
+Visual 2008 Express does not come with MFC which is required for this project.
+
+The installation of these items is fully described in the settingup_build_environment.txt file.

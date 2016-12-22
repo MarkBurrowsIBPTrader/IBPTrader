@@ -1,0 +1,125 @@
+IB_PTrader
+----------
+
+How to build
+------------
+
+The project was originally built with Visual Studio 2008 SP1 (note you will getting a missing 
+afxcontrolbars.h error with a pre SP1 VS2008).
+
+It is possible to build with a later version of VS, but you will need to use the v90 platform toolset,
+(ib_ptrader property pages Configuration Properties/General/Platform Toolset set to v90).
+
+If you use a later toolset (such as v100, v110_xp, v110, v120_xp or v120) you may encounter the following build issues:-
+1) missing afxwin.h error - MFC is not installed (VS2008 Express does not include MFC)
+2) build errors concerning the type XMLCh (part of xerces xml parser)
+3) a COFF error on linking
+
+These different errors seem to vary depending on the OS being built under/different Service Packs applied
+to Visual Studio. Even if the project successfully builds the MySQL connector (mysqlcppconn.dll) will generally fault. 
+It may be possible to build with a later toolset if you also rebuild both the Xerces XML parser and MySQL Connector 
+(and maybe Chart Director) with the same toolset. I haven't tried this so I cannot confirm if it would work.
+
+The project can only be built in a Release configuration. This is because of problems with the IB API. The Release configuration
+is built with a program database setting enabled in order to allow debugging.
+
+Unfortunately due to the use of 3rd party software the instructions for setting up a build and runtime environment
+are quite complicated. The following items need to be installed:-
+
+IB TWS (you will need an IB account to run, but not to build)
+IB API (install to c:\tws api)
+MySQL
+MySQL Connector C++ (1.1.3)
+MySQL .NET Connector (ver 6.8.3)
+Boost (install to C:\boost_1_55_0)
+Chart Director (install to C:\chartdir_cpp_win32)
+Xerces XML parser (install to C:\xerces-c-3.1.1-x86-windows-vc-9.0)
+IB_PTrader source code (copy to c:\ib_ptrader)
+
+The solution assumes boost, chart director, xerces, ib_ptrader source code are all
+located on the C: hard drive.
+
+IB TWS
+------
+
+goto https://www.interactivebrokers.com/en/?f=674&ib_entity=uk 
+and download TWS for Windows
+
+IB API
+------
+
+goto http://interactivebrokers.github.io/# and press "I Agree"
+download IB API for Windows API 9.70
+Note due changes IB may have made to headers downloading any other version
+of the API may cause build errors. Install to c:\tws api
+
+MySQL
+-----
+
+goto http://dev.mysql.com/downloads/windows/installer/
+and download MySQL Installer 5.6.17 for 32 bit. 
+When installing enable the "skip the check for updates" option as this
+installs later versions of MySQL software.
+
+As well as the MySQL server and workbench
+ensure you install MySQL Connector C++ 1.1.3 and .NET Connector 6.8.3. Picking the
+"Developer Default" option will ensure this.
+
+Note on 64 bit OSes the installer will install the 64 bit versions by default,
+ensure that you select the 32 bit editions. On a 64 bit OS select the "Custom"
+option and on the next screen change the Architecture setting to 32 bit.
+
+Boost
+-----
+
+Boost is needed to build with the MySQL C++ connector
+goto http://www.boost.org/users/history/version_1_55_0.html
+download the windows version and install to c:\boost_1_55_0
+
+Chart Director
+--------------
+
+goto http://www.advsofteng.com/download.html 
+goto "ChartDirector for C++" section and download Windows (32-bit) version - 
+read the section marked "unblock the ZIP file" in the description,
+extract to the C: drive
+
+Xerces XML parser
+-----------------
+
+goto http://xerces.apache.org/xerces-c/download.cgi
+download the 32 bit binary distribution - xerces-c-3.1.1-x86-windows-vc-9.0.zip
+and extract to C:
+
+IB_PTrader Source Code
+----------------------
+
+The source tree is c:\ib_ptrader which contains the .cpp/.h/project files. The resource
+files are stored in the res directory.
+
+Below are the include and lib paths in the project. If you download different versions of the above
+software you will have to change the paths accordingly. Note depending on which installer is used
+the C++ connector can be installed to either "C:\Program Files\MySQL\Connector C++ 1.1.3"
+or to "C:\Program Files\MySQL\MySQL Connector C++ 1.1.3". Also note if MySQL has been installed on
+a 64 bit platform then all the "Program Files" part of the paths become "Programs Files (x86)".
+
+Includes
+--------
+
+C:\TWS API\source\CppClient\Shared;
+C:\TWS API\source\CppClient\src;
+C:\Program Files\MySQL\Connector C++ 1.1.3\include;
+C:\Program Files\MySQL\Connector C++ 1.1.3\include\cppconn;
+C:\xerces-c-3.1.1-x86-windows-vc-9.0\include;
+C:\chartdir_cpp_win32\ChartDirector\include;
+C:\boost_1_55_0
+
+Libs
+----
+
+C:\Program Files\MySQL\Connector C++ 1.1.3\lib\opt;
+C:\xerces-c-3.1.1-x86-windows-vc-9.0\lib;
+C:\chartdir_cpp_win32\ChartDirector\lib
+
+The following 3rd party libraries are linked to:-
+mysqlcppconn.lib xerces-c_3.lib chartdir51.lib

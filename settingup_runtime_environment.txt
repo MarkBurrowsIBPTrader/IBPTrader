@@ -1,0 +1,202 @@
+IB_PTrader
+----------
+
+
+Paths
+-----
+
+Add the following directories to the System path for mysqlcppconn.dll and libmysql.dll:-
+C:\Program Files\MySQL\Connector C++ 1.1.3\lib\opt;C:\Program Files\MySQL\MySQL Server 5.6\lib
+
+copy chartdir51.dll (found in C:\chartdir_cpp_win32\ChartDirector\lib)
+and xerces-c_3_1.dll (found in C:\xerces-c-3.1.1-x86-windows-vc-9.0\bin)
+to the runtime directory for IB_PTrader. Alternatively you add these directories to the
+System path.
+
+
+How to run
+----------
+
+First create a DB schema using MySQL Workbench. The app has only been tested using the InnoDB database engine
+for a schema. You will need to import the table definitions contained in the ibrokers.sql file. 
+This file can be found in the DB directory.
+
+There are 2 versions of schema definitions - ibrokers.sql and ibrokers_round.sql
+The 2nd schema has rounding set to 2 decimal places on some of the columns on the trades table. When there
+is no rounding (as in ibrokers.sql) you can get double values with a large number of decimal places in
+the trades table.
+
+You can either execute this script from inside the workbench or issue the following on the command line:-
+mysql --user=dbusername --password=dbpwd nameofschema < ibrokers.sql
+
+The schema should now contain the following DB tables:-
+deals, orders, pgens, recordedprices, shares, trades
+
+The deals table stores all the buy/sell orders
+The orders table stores the currently active buy/sell orders (ie that have not been executed yet)
+The pgens table stores the filenames of the xml files the app uses for import
+The recordedprices table is deprecated for the public release of this app
+The shares table stores the shares the app requests price data for
+The trades table records the details of buy/sell orders (and profits) that have been executed
+
+In order to populate these tables a couple of command line tools are supplied (found in the DB directory):-
+
+
+PShare
+------
+
+pshare - this inserts shares into the shares table. The syntax for pshare is as follows:-
+
+pshare [dbschema,dbusername,dbpwd,dbhostname] [twsusername,twsaccountnumber] [ticker,displayname,exchange,maxoi,maxvalue]
+
+An example would be:-
+
+pshare [demoschema,dbusername,dbpwd,localhost] [twsusername,twsaccountnumber] [AAPL,Apple,NASDAQ.NMS,1000,250000]
+
+This means IB_PTrader can hold a maximum of 1000 Apple shares, or up to a value of $250000. Note the name of the exchange is
+the same as displayed in TWS. TWS will reject any price requests for a share if it is not entered on a TWS Quote Monitor.
+
+When pshare has finished it displays a ticker id for the share. Please note this as it is needed for the pgen app.
+
+
+PGen
+----
+
+pgen - this can be used to create buy/sell orders which ultimately populate the deals table. This app creates an xml file for a share
+giving the buy/sell orders. IB_PTrader imports this XML file and populates the deals table with it's contents.
+The syntax for pgen is as follows:-
+
+pgen [dbschema,dbusername,dbpwd,dbhostname] [twsusername,twsaccountnumber] [tickerid,sharestartprice,shareendprice,gap,selloffset,numberbuyshares,pgenfilename] 
+
+An example would be:-
+
+pgen [demoschema,dbusername,dbpwd,localhost] [twsusername,twsaccountnumber] [0,1,1200,0.5,1.25,15,c:\pgens\apple.xml]
+
+The fields:-
+0                  - the ticker id - use the same as noted after pshare ran
+1                  - first share buy at $1
+1200               - last share buy at $1200
+0.5                - buy a share every $0.5. ie the buys would be at $1, $1.5, $2, $2.5 all the way up to $1200
+1.25               - sell the shares after they have gone up $1.25. eg shares bought at $1 sell at $2.25, shares bought at $1200 sell at $1201.25
+15,                - buy 15 shares at a time. gross profit on sale (ignoring commissions) would be 15 X $1.25
+c:\pgens\apple.xml - this is file buy/sell orders are recorded. pgen automatically creates the directory if necessary.
+
+You can specify any number of buy/sell order ranges, for example:-
+
+pgen [demoschema,dbusername,dbpwd,localhost] [twsusername,twsaccountnumber] [0,1,1200,0.5,1.25,15,c:\pgens\apple.xml] [0,1.25,1200,0.5,5.25,50,c:\pgens\apple.xml]
+
+pgen will merge the buy/orders together - ensure you specify the same xml file for all ranges. You can tell pgen to
+empty pgens DB table instead of merging it by using the [delete] argument at any point, eg
+
+pgen [demoschema,dbusername,dbpwd,localhost] [twsusername,twsaccountnumber] [0,1,1200,0.5,1.25,15,c:\pgens\apple.xml] [delete] 
+[0,1.25,1200,0.5,5.25,50,c:\pgens\apple.xml]
+
+Below is an example of a generated XML file. The last order is commented for anyone who wants to handcraft a file. Note an XML parser will error the shown XML comments 
+because of their location.
+
+<orders>
+ <order ticker="AMZN" tickerid="44" buyprice="100.5" numberbuyshares="1" sellprice="104.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="101.0" numberbuyshares="1" sellprice="104.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="101.5" numberbuyshares="1" sellprice="105.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="102.0" numberbuyshares="1" sellprice="105.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="102.5" numberbuyshares="1" sellprice="106.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="103.0" numberbuyshares="1" sellprice="106.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="103.5" numberbuyshares="1" sellprice="107.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="104.0" numberbuyshares="1" sellprice="107.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="104.5" numberbuyshares="1" sellprice="108.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="105.0" numberbuyshares="1" sellprice="108.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="105.5" numberbuyshares="1" sellprice="109.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="106.0" numberbuyshares="1" sellprice="109.5" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN" tickerid="44" buyprice="106.5" numberbuyshares="1" sellprice="110.0" numbersellshares="1" sectype="STK" exchange="SMART" primaryexchange="NASDAQ.NMS" currency="USD" localsymbol="AMZN" secidtype="" secid="" genericticks="100,101,104,105,106,107,165,221,225,233,236,258" displayname="Amazon" ></order>
+ <order ticker="AMZN"                                                                   <!-- ticker name  --> 
+        tickerid="44"                                                                   <!-- ticker id --> 
+        buyprice="100"                                                                  <!-- buy price --> 
+        numberbuyshares="1"                                                             <!-- number of shares to buy --> 
+        sellprice="103.5"                                                               <!-- the sell price --> 
+        numbersellshares="1"                                                            <!-- number of shares to sell --> 
+        sectype="STK"                                                                   <!-- always use this value --> 
+        exchange="SMART"                                                                <!-- usually SMART, but you can use a specific exchange such as ARCA --> 
+        primaryexchange="NASDAQ.NMS"                                                    <!-- the exchange for the share --> 
+        currency="USD"                                                                  <!-- the share's currency --> 
+        localsymbol="AMZN"                                                              <!-- same as ticker name --> 
+        secidtype=""                                                                    <!-- always use this value --> 
+        secid=""                                                                        <!-- always use this value --> 
+        genericticks="100,101,104,105,106,107,165,221,225,233,236,258"                  <!-- always use this value --> 
+        displayname="Amazon"                                                            <!-- the display name for the ticker --> 
+>
+</order>
+</orders>
+
+If you handcraft a file you will have to manually add an entry to the pgens DB table to reference it.
+
+
+PGendel
+-------
+
+This utility deletes the buy/sell orders from the deals table for a particular ticker id. The
+syntax is as follows:-
+
+pgen [demoschema,dbusername,dbpwd,localhost] [twsusername,twsaccountnumber] tickerid
+
+If there are outstanding orders pgendel will prompt to confirm the action.
+
+
+PShare/PGen Examples
+--------------------
+
+The DB directory contains a batch file eg.bat. This file creates an example set of tickers for trading. The batch
+file assumes a db schema 'demoschema' exists and has had the ibrokers.sql/ibrokers_round.sql script executed on it. Run:-
+
+eg dbusername dbpwd twsusername twsaccountnumber
+
+
+Configuring TWS
+----------------
+
+On the Configure dialog go to API/Settings:-
+click Enable ActiveX and Socket Clients
+set the Socket Port to 7498
+Create a Trusted IP Address of 127.0.0.1
+
+A limitation of TWS is that all accounts (Live/Paper) must run on the same machine at the same time (price feed data is only
+supported for 1 PC at a time). IB_PTrader can run multiple copies on the same machine (1 for each TWS Workstation running).
+Each IB_PTrader will need to use a separate socket port number. It is recommended that each IB_PTrader uses its own DB
+schema. Although in theory each instance could share the same schema this has not been tested.
+
+
+Starting IB_PTrader
+-------------------
+
+The command line for starting the app is:-
+
+ib_ptrader TWS=twsusername,twsaccountnumber,Live|Paper,clientid,portnumber DB=schemaname,dbusername,dbpwd,dbhostname
+
+An example is:-
+
+ib_ptrader TWS=twsusername,twsaccountnumber,Paper,1,7498 DB=demoschema,dbusername,dbpwd,localhost
+
+The client id is usually 1, the port number (7498) must match the one configured inside TWS. Each running instance of
+TWS must have an unique socket number configured, and each running instance of IB_PTrader must have a matching port
+number to its corresponding TWS.
+
+
+Using IB_PTrader
+----------------
+
+On start up there 1 of 3 buttons that can be selected:-
+"DB" - read buy/sell orders from the db
+"DB/XML" - read and merge buy/sell orders from DB/XML
+"XML" - read orders from XML
+
+The XML options should only be used when initially adding new buy/sell orders. The rest of the time
+the DB option should be used. The use of the app is explained in the gui.txt file.
+
+
+Tested Scenarios
+----------------
+
+IB_PTrader has been tested with MySQL Community Edition 32 bit 5.6.17 on the following platforms:-
+
+Windows XP inside a VMWARE virtual machine
+Windows 7 32 bit inside a VMWARE virtual machine
+Windows Vista 64 bit inside a VMWARE virtual machine

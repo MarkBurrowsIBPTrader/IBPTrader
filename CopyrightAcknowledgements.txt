@@ -1,0 +1,9 @@
+ChartViewer.h is Copyright 2012 Advanced Software Engineering Limited (http://www.advsofteng.com)
+
+ib_tryagain.ico is Copyright http://handdrawngoods.com/
+                license at http://www.iconarchive.com/icons/handdrawngoods/busy/license.txt
+                the name of .ico file was changed from Handdrawngoods-Busy-Chart-2.ico
+                to ib_tryagain.ico
+
+ChartViewer.cpp is Copyright 2012 Advanced Software Engineering Limited
+
