@@ -1,2 +1,2 @@
 # IBPTrader
-Trading System for Interactive Brokers TWS Platform
+Trading System for the Interactive Brokers TWS Platform
