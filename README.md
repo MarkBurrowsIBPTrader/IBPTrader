@@ -1,5 +1,5 @@
 
-# IBPTrader
+# IB_PTrader
 
 
 IB_PTrader is an automated trading application designed to work on the Interactive Brokers TWS platform.
