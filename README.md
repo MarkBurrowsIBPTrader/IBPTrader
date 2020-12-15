@@ -30,3 +30,5 @@ Since the app was intended for personal use the GUI lacks a polished look and ch
 Interactive Brokers offers 2 types of commission pricing - Cost Plus and Flat Rate. Currently the app only
 supports Flat Rate. Anyone using the Cost Plus plan will have to code this up. This is important because the
 app attempts to estimate the commission part of a trade to prevent trading losses in a situation where a sell order is too close to the buy order.
+
+![Alt text](/ScreenShots/2nd_dataloaded.jpg?raw=true)
