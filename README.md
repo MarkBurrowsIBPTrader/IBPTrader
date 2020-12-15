@@ -32,3 +32,4 @@ supports Flat Rate. Anyone using the Cost Plus plan will have to code this up. T
 app attempts to estimate the commission part of a trade to prevent trading losses in a situation where a sell order is too close to the buy order.
 
 ![Alt text](/ScreenShots/2nd_dataloaded.jpg?raw=true)
+![Alt text](/ScreenShots/6th_livechart.jpg?raw=true)
